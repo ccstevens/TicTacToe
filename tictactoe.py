@@ -123,9 +123,12 @@ def print_board(board):
     '''
     
     board_separator = '\n' + '|'.join('---' for i in range(len(board))) + '\n'
+    print '\n'
     print(board_separator.join(['|'.join([' ' + token + ' ' for token in row]) 
                                for row in board]))
-                                        
+                               
+    print '\n'
+
 def main():
     '''
 
@@ -147,12 +150,15 @@ def main():
     player_one = X_CHAR
     player_two = O_CHAR
     current_player = player_two
+    moves = 0
+    max_moves = BOARD_WIDTH * BOARD_HEIGHT
+    winner = False
     
     #
     # Run the game input the winning condition is found for the current player.
     #
     
-    while not has_won(board, current_player):
+    while not winner and moves < max_moves:        
     
         #
         # Switch players.
@@ -167,9 +173,7 @@ def main():
         # Print the updated board.
         #
            
-        print '\n'
         print_board(board)        
-        print '\n'
         
         #
         # Try to collect valid input for the current player.
@@ -178,23 +182,25 @@ def main():
         while True:   
             valid_row = False
             while not valid_row:
-                row = raw_input(current_player + ' enter the row: ')
+                prompt = ', enter a row [0, ' + str(BOARD_HEIGHT - 1) + ']:'
+                row = raw_input(current_player + prompt)
                 try:    
                     row = int(row)
                     valid_row = row in range(BOARD_HEIGHT)
                     
                 except ValueError:
-                    print 'Enter a valid row between 0 and ' + BOARD_HEIGHT
+                    pass
 
             valid_col = False
             while not valid_col:
-                col = raw_input(current_player + ' enter the column: ')
+                prompt = ', enter a col [0, ' + str(BOARD_WIDTH - 1) + ']:'
+                col = raw_input(current_player + prompt)
                 try:    
                     col = int(col)
                     valid_col = col in range(BOARD_WIDTH)
                     
                 except ValueError:
-                    print 'Enter a valid column between 0 and ' + BOARD_WIDTH
+                    pass
             
             #
             # Make sure the space is empty.
@@ -206,13 +212,19 @@ def main():
             print 'Space is already occupied by ' + board[row][col]
             
         #
-        # Fill in the space with the current character's value.
+        # Fill in the space with the current character's value and check to
+        # see if there is a winner.
         #
         
         board[row][col] = current_player
+        winner = has_won(board, current_player)
+        moves += 1
     
     print_board(board)
-    print current_player + ' won the game!'
-            
+    if winner:
+        print current_player + ' won the game!'
+    else:
+        print 'It is a tie!'
+    
 if __name__ == '__main__':
     main()
