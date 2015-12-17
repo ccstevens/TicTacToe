@@ -99,7 +99,7 @@ def get_row_col(board, current_player, row):
     
     '''
 
-    board_dimension = len(board) + 1
+    board_dimension = len(board)
     if row:
         prompt = 'row'
     
@@ -113,7 +113,7 @@ def get_row_col(board, current_player, row):
         index = raw_input(prompt)
         try:    
             index = int(index)
-            valid = index in range(1, board_dimension)
+            valid = index in range(1, board_dimension + 1)
                         
         except ValueError:
             pass
