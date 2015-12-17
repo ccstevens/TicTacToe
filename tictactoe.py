@@ -21,6 +21,7 @@ Author:
 #
 
 from constants import *
+from random import *
 
 #
 # ----------------------------------------------------------------- Definitions
@@ -31,22 +32,134 @@ from constants import *
 #
 
 #
+# Define the array of available opponent (AI) types.
+#
+
+ai_types = [(AI_HUMAN, 0, 'Human (find a friend)'),
+            (AI_RANDOM, 0, 'Random (you better win)')]
+
+#
 # ------------------------------------------------------------------- Functions
 #
 
-def create_board(width, height):
+def get_ai_move(board, ai_type, moves, current_player):
     '''
     
     Routine Description:
     
-        This routine creates and initializes a width by height Tic-Tac-Toe 
-        board.
-    
+        This routine gets the next move for the computer (AI) player.
+        
     Arguments:
     
-        width - Supplies the desired width of the board.
+        board - Supplies the current game board.
         
-        height - Supplies the desired height of the board.
+        moves - Supplies the total number of moves that have been made in the
+            game, including the current move.
+            
+        current_player - Supplies the token of the player making the move.
+        
+    Return Value:
+    
+        A row, col tuple for the coordinates of the AI's next move.
+        
+    '''    
+
+    if ai_type is AI_RANDOM:
+        while True:
+            row = int(random() * len(board));
+            col = int(random() * len(board));
+            if board[row][col] == EMPTY_CHAR:
+                break;
+                
+    else:
+        row, col = get_human_move(board, current_player)        
+        
+    return row, col
+    
+def get_row_col(board, current_player, row):
+    '''
+    
+    Routine Description:
+    
+        This routine gets a row or column index from the user.
+        
+    Arguments:
+    
+        board - Supplies the current game board.
+        
+        current_player - Supplies the token of the current player.
+        
+        row - Supplies a boolean indicating whether the input is for a row 
+            (True) or a column (False).
+            
+    Return Value:
+    
+        Returns the row or column index between 0 and the dimension of the 
+        board, not inclusive.
+    
+    '''
+
+    board_dimension = len(board) + 1
+    if row:
+        prompt = 'row'
+    
+    else:
+        prompt = 'column'
+        
+    prompt = current_player + ', enter a ' + prompt
+    prompt += ' [1, ' + str(board_dimension) + ']:'
+    valid = False
+    while not valid:
+        index = raw_input(prompt)
+        try:    
+            index = int(index)
+            valid = index in range(1, board_dimension)
+                        
+        except ValueError:
+            pass
+            
+    return index - 1
+
+def get_human_move(board, current_player):
+    '''
+    
+    Routine Description:
+    
+        This routine gets a move from a human player.
+        
+    Arguments:
+    
+        board - Supplies the current game board.
+        
+        current_player - Supplies the token identifier for the current player.
+    
+    Return Value:
+    
+        A row, col tuple for the coordinates of the human's next move.
+    
+    '''
+    
+    while True:
+        row = get_row_col(board, current_player, True)
+        col = get_row_col(board, current_player, False)                
+        if board[row][col] == EMPTY_CHAR:
+            break;
+                    
+        print 'Space is already occupied by ' + board[row][col]
+        
+    return row, col
+            
+def create_board(dimension):
+    '''
+    
+    Routine Description:
+    
+        This routine creates and initializes a Tic-Tac-Toe board with the given
+        dimension. Tic-Tac-Toe boards are always square.        
+    
+    Arguments:
+
+        dimension - Supplies the dimension of the Tic-Tac-Toe board.
         
     Return Value:
     
@@ -54,7 +167,7 @@ def create_board(width, height):
     
     '''
 
-    return [[EMPTY_CHAR for x in range(width)] for y in range(height)]
+    return [[EMPTY_CHAR for x in range(dimension)] for y in range(dimension)]
     
 def has_won(board, player):
     '''
@@ -87,7 +200,7 @@ def has_won(board, player):
     # Search the columns for a victory.
     #
     
-    for i in range(BOARD_WIDTH):
+    for i in range(len(board)):
         if all(value == player for value in [row[i] for row in board]):
             return True
     
@@ -146,18 +259,65 @@ def main():
 
     '''
 
-    board = create_board(BOARD_WIDTH, BOARD_HEIGHT)
-    player_one = X_CHAR
-    player_two = O_CHAR
-    current_player = player_two
-    moves = 0
-    max_moves = BOARD_WIDTH * BOARD_HEIGHT
-    winner = False
+    print '\nWelcome to TicTacToe!'
+
+    #
+    # Get the board dimension.
+    #
     
+    prompt = '\nPick the board dimension (e.g. 3 = 3x3 board): '
+    while True:
+        dimension = raw_input(prompt)
+        try:
+            dimension = int(dimension)
+            if dimension >= MINIMUM_DIMENSION:
+                break;
+                
+        except ValueError:
+            pass
+            
+        print 'Invalid dimension. Try again.\n'
+
+    #
+    # Get the desired AI type.
+    #
+    
+    print '\nHere are the available opponents:\n'
+    valid_ai_types = [type for type in ai_types 
+                               if type[1] == 0 or type[1] >= dimension]
+                      
+    for ai_type in valid_ai_types:
+        print '\t' + str(ai_type[0]) + ' - ' + ai_type[2]
+
+    print ''        
+    while True:
+        ai_type = raw_input('Please pick an opponent: ')
+        try:
+            ai_type = int(ai_type)        
+            if ai_type in [types[0] for types in valid_ai_types]:
+                break
+                
+        except ValueError:
+            pass
+            
+        print 'Invalid opponent. Try again.\n'
+            
+    #
+    # Create the game board.
+    #
+            
+    board = create_board(dimension)
+
     #
     # Run the game input the winning condition is found for the current player.
     #
     
+    player_one = X_CHAR
+    player_two = O_CHAR
+    current_player = player_two
+    moves = 0
+    max_moves = dimension * dimension
+    winner = False
     while not winner and moves < max_moves:        
     
         #
@@ -166,6 +326,7 @@ def main():
     
         if current_player == player_one:
             current_player = player_two
+            
         else:
             current_player = player_one
 
@@ -179,37 +340,15 @@ def main():
         # Try to collect valid input for the current player.
         #
         
-        while True:   
-            valid_row = False
-            while not valid_row:
-                prompt = ', enter a row [0, ' + str(BOARD_HEIGHT - 1) + ']:'
-                row = raw_input(current_player + prompt)
-                try:    
-                    row = int(row)
-                    valid_row = row in range(BOARD_HEIGHT)
-                    
-                except ValueError:
-                    pass
-
-            valid_col = False
-            while not valid_col:
-                prompt = ', enter a col [0, ' + str(BOARD_WIDTH - 1) + ']:'
-                col = raw_input(current_player + prompt)
-                try:    
-                    col = int(col)
-                    valid_col = col in range(BOARD_WIDTH)
-                    
-                except ValueError:
-                    pass
-            
-            #
-            # Make sure the space is empty.
-            #
-            
-            if board[row][col] == EMPTY_CHAR:
-                break;
-                
-            print 'Space is already occupied by ' + board[row][col]
+        if current_player == player_one:
+            row, col = get_human_move(board, current_player)
+               
+        #
+        # Get the opponent's move.
+        #
+               
+        else:
+            row, col = get_ai_move(board, ai_type, moves, current_player)
             
         #
         # Fill in the space with the current character's value and check to
@@ -223,6 +362,7 @@ def main():
     print_board(board)
     if winner:
         print current_player + ' won the game!'
+        
     else:
         print 'It is a tie!'
     

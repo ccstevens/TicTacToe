@@ -21,11 +21,10 @@ Author:
 #
 
 #
-# Define the height and width of the Tic-Tac-Toe board.
+# Tic-Tac-Toe games less than 3x3 are trivial.
 #
 
-BOARD_WIDTH = 3
-BOARD_HEIGHT = 3
+MINIMUM_DIMENSION = 3
 
 #
 # Define the characters used for the two players.
@@ -34,3 +33,10 @@ BOARD_HEIGHT = 3
 EMPTY_CHAR = ' '
 X_CHAR = 'X'
 O_CHAR = 'O'
+
+#
+# Define the various opponent (AI) types.
+#
+
+AI_HUMAN = 1
+AI_RANDOM = 2
