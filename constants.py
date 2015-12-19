@@ -40,3 +40,4 @@ O_CHAR = 'O'
 
 AI_HUMAN = 1
 AI_RANDOM = 2
+AI_MINIMAX = 3
